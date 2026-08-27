@@ -1092,7 +1092,7 @@ body.edit-mode [contenteditable]:empty::before{content:attr(data-placeholder);op
   </div>
 </div>
 
-<div id="editModeBar" style="position:fixed;bottom:24px;left:24px;z-index:99999;display:flex;gap:10px;align-items:center;">
+<div id="editModeBar" style="position:fixed;bottom:24px;left:24px;z-index:99999;display:none;gap:10px;align-items:center;">
   <button id="editModeBtn" onclick="toggleEditMode()" style="background:linear-gradient(135deg,#023e5c,#0096c7);color:#fff;border:none;padding:13px 22px;border-radius:40px;font-family:'Heebo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 6px 24px rgba(0,60,100,.35);display:flex;align-items:center;gap:8px;transition:all .25s;">✏️ ערוך אתר</button>
   <button id="editSaveBtn" onclick="saveEdits()" style="background:linear-gradient(135deg,#27ae60,#2ecc71);color:#fff;border:none;padding:13px 22px;border-radius:40px;font-family:'Heebo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 6px 24px rgba(39,174,96,.35);display:none;align-items:center;gap:8px;">💾 שמור</button>
   <button id="openEditorPanelBtn" onclick="openEditor()" style="background:rgba(255,255,255,.95);color:#023e5c;border:2px solid rgba(0,150,199,.3);padding:13px 18px;border-radius:40px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:none;align-items:center;gap:6px;">⚙️ פאנל</button>
@@ -3131,5 +3131,31 @@ if (_origOpenEditor) {
 
 document.addEventListener('DOMContentLoaded', _loadSavedEdits);
 if (document.readyState !== 'loading') _loadSavedEdits();
+
+// ══ Hidden admin-editor unlock ══
+// Visitors never see the edit bar. Owner unlocks it once per browser by visiting
+// the site with ?edit=sabonim2026 in the URL; after that it stays unlocked on
+// that browser/device (remembered in localStorage) until _adminLock() is called.
+(function() {
+  var ADMIN_KEY = 'sabonim_admin_unlocked';
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('edit') === 'sabonim2026') {
+    localStorage.setItem(ADMIN_KEY, '1');
+    if (window.history && window.history.replaceState) {
+      var url = new URL(window.location.href);
+      url.searchParams.delete('edit');
+      window.history.replaceState({}, '', url);
+    }
+  }
+  function _showAdminBar() {
+    var bar = document.getElementById('editModeBar');
+    if (bar) bar.style.display = 'flex';
+  }
+  if (localStorage.getItem(ADMIN_KEY) === '1') {
+    if (document.readyState !== 'loading') _showAdminBar();
+    else document.addEventListener('DOMContentLoaded', _showAdminBar);
+  }
+  window._adminLock = function() { localStorage.removeItem(ADMIN_KEY); location.reload(); };
+})();
 </script>
 </body></html>
