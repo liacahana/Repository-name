@@ -55,12 +55,17 @@ body{font-family:'Heebo',sans-serif;background:#fdf6ee;color:var(--dark);overflo
 .nav-overlay{display:none;position:fixed;inset:0;background:rgba(30,15,0,.4);z-index:10001;}
 .nav-overlay.open{display:block;}
 .mobile-search-close{display:none;}
+.mobile-cat-strip{display:none;}
 @media(max-width:860px){
+  body{padding-top:114px;}
+  .mobile-cat-strip{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;position:fixed;top:68px;right:0;left:0;background:#fffaf4;padding:10px 14px;z-index:9998;border-bottom:1px solid rgba(180,130,60,.15);scrollbar-width:none;}
+  .mobile-cat-strip::-webkit-scrollbar{display:none;}
+  .mobile-cat-strip button{flex:0 0 auto;white-space:nowrap;background:var(--mint);border:none;padding:8px 16px;border-radius:20px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:600;color:var(--dark);cursor:pointer;}
   .nav-c{padding:0 14px;gap:6px;}
   .mobile-menu-btn,.mobile-search-btn{display:flex;align-items:center;justify-content:center;}
-  .nav-c [data-search-wrap]{position:fixed!important;top:68px;right:0;left:0;max-width:none!important;margin:0!important;background:#fffaf4;padding:12px 16px;box-shadow:0 8px 24px rgba(100,60,20,.12);display:none;z-index:9999;}
+  .nav-c [data-search-wrap]{position:fixed!important;top:114px;right:0;left:0;max-width:none!important;margin:0!important;background:#fffaf4;padding:12px 16px;box-shadow:0 8px 24px rgba(100,60,20,.12);display:none;z-index:9999;}
   .nav-c [data-search-wrap].open{display:block;}
-  [data-search-wrap].open + .mobile-search-close{display:flex;align-items:center;justify-content:center;position:fixed;top:76px;left:20px;z-index:10000;background:#fff;border-radius:50%;width:32px;height:32px;font-size:15px;color:var(--dark);box-shadow:0 4px 14px rgba(0,0,0,.18);}
+  [data-search-wrap].open + .mobile-search-close{display:flex;align-items:center;justify-content:center;position:fixed;top:122px;left:20px;z-index:10000;background:#fff;border-radius:50%;width:32px;height:32px;font-size:15px;color:var(--dark);box-shadow:0 4px 14px rgba(0,0,0,.18);}
   .nav-links{position:fixed;top:0;right:-88%;width:82%;max-width:340px;height:100dvh;background:#fffaf4;flex-direction:column;align-items:stretch;overflow-y:auto;transition:right .3s cubic-bezier(.16,1,.3,1);box-shadow:-14px 0 50px rgba(40,20,0,.2);z-index:10002;padding:70px 0 30px;}
   .nav-links.open{right:0;}
   .nav-close-btn{display:flex;position:absolute;top:14px;left:14px;font-size:22px;}
@@ -550,6 +555,13 @@ body.edit-mode [contenteditable]:empty::before{content:attr(data-placeholder);op
       <button class="cart-btn" onclick="openWish()" style="background:linear-gradient(135deg,#e8c46a,#c9a84c);">🤍<span class="cart-lbl"> מועדפים</span><span class="cart-badge" id="wishBadge" style="background:#e84393;">0</span></button>
       <button class="cart-btn" onclick="openCart()">🛒<span class="cart-lbl"> עגלה</span><span class="cart-badge" id="cartBadge">0</span></button>
     </div>
+  </div>
+  <div class="mobile-cat-strip">
+    <button onclick="openMobileCat(0)">🧼 סבונים</button>
+    <button onclick="openMobileCat(1)">🕯️ נרות</button>
+    <button onclick="openMobileCat(2)">🌺 מפיצי ריח</button>
+    <button onclick="openMobileCat(3)">🎁 מתנות</button>
+    <button onclick="openMobileCat(4)">📦 מארזים</button>
   </div>
 </header>
 
@@ -3183,6 +3195,12 @@ function toggleMobileMenu(open) {
     document.body.style.overflow = '';
     document.querySelectorAll('.nav-item.dd-open').forEach(el => el.classList.remove('dd-open'));
   }
+}
+function openMobileCat(idx) {
+  toggleMobileMenu(true);
+  const items = document.querySelectorAll('.nav-links .nav-item');
+  items.forEach((el, i) => el.classList.toggle('dd-open', i === idx));
+  if (items[idx]) items[idx].scrollIntoView({block: 'nearest'});
 }
 function toggleMobileSearch() {
   const wrap = document.querySelector('[data-search-wrap]');
