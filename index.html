@@ -56,11 +56,15 @@ body{font-family:'Heebo',sans-serif;background:#fdf6ee;color:var(--dark);overflo
 .nav-overlay.open{display:block;}
 .mobile-search-close{display:none;}
 .mobile-cat-strip{display:none;}
+.mobile-quick-dd{display:none;}
 @media(max-width:860px){
   body{padding-top:114px;}
   .mobile-cat-strip{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;position:fixed;top:68px;right:0;left:0;background:#fffaf4;padding:10px 14px;z-index:9998;border-bottom:1px solid rgba(180,130,60,.15);scrollbar-width:none;}
   .mobile-cat-strip::-webkit-scrollbar{display:none;}
   .mobile-cat-strip button{flex:0 0 auto;white-space:nowrap;background:var(--mint);border:none;padding:8px 16px;border-radius:20px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:600;color:var(--dark);cursor:pointer;}
+  .mobile-cat-strip button.active{background:linear-gradient(135deg,#c9a84c,#7a5c3a);color:#fff;}
+  .mobile-quick-dd{position:fixed;top:114px;right:0;left:0;max-height:60vh;overflow-y:auto;background:#fff;z-index:9997;box-shadow:0 14px 34px rgba(0,60,100,.18);border-bottom:1px solid rgba(180,130,60,.15);padding:8px 0;}
+  .mobile-quick-dd.open{display:block;}
   .nav-c{padding:0 14px;gap:6px;}
   .mobile-menu-btn,.mobile-search-btn{display:flex;align-items:center;justify-content:center;}
   .nav-c [data-search-wrap]{position:fixed!important;top:114px;right:0;left:0;max-width:none!important;margin:0!important;background:#fffaf4;padding:12px 16px;box-shadow:0 8px 24px rgba(100,60,20,.12);display:none;z-index:9999;}
@@ -563,6 +567,7 @@ body.edit-mode [contenteditable]:empty::before{content:attr(data-placeholder);op
     <button onclick="openMobileCat(3)">🎁 מתנות</button>
     <button onclick="openMobileCat(4)">📦 מארזים</button>
   </div>
+  <div class="mobile-quick-dd" id="mobileQuickDD"></div>
 </header>
 
 <!-- ══════════════════════════════════════
@@ -3197,10 +3202,21 @@ function toggleMobileMenu(open) {
   }
 }
 function openMobileCat(idx) {
-  toggleMobileMenu(true);
   const items = document.querySelectorAll('.nav-links .nav-item');
-  items.forEach((el, i) => el.classList.toggle('dd-open', i === idx));
-  if (items[idx]) items[idx].scrollIntoView({block: 'nearest'});
+  const srcDD = items[idx] ? items[idx].querySelector('.dd') : null;
+  const quick = document.getElementById('mobileQuickDD');
+  const stripBtns = document.querySelectorAll('.mobile-cat-strip button');
+  if (!srcDD || !quick) return;
+  const alreadyOpenForThis = quick.classList.contains('open') && quick.dataset.idx === String(idx);
+  stripBtns.forEach((b, i) => b.classList.toggle('active', !alreadyOpenForThis && i === idx));
+  if (alreadyOpenForThis) {
+    quick.classList.remove('open');
+    quick.dataset.idx = '';
+    return;
+  }
+  quick.innerHTML = srcDD.innerHTML;
+  quick.dataset.idx = String(idx);
+  quick.classList.add('open');
 }
 function toggleMobileSearch() {
   const wrap = document.querySelector('[data-search-wrap]');
@@ -3221,6 +3237,16 @@ document.addEventListener('click', function(e) {
     item.classList.toggle('dd-open', !wasOpen);
   } else if (e.target.closest('.dd-a')) {
     toggleMobileMenu(false);
+    const quick = document.getElementById('mobileQuickDD');
+    if (quick) { quick.classList.remove('open'); quick.dataset.idx = ''; }
+    document.querySelectorAll('.mobile-cat-strip button.active').forEach(b => b.classList.remove('active'));
+  } else if (!e.target.closest('.mobile-quick-dd') && !e.target.closest('.mobile-cat-strip')) {
+    const quick = document.getElementById('mobileQuickDD');
+    if (quick && quick.classList.contains('open')) {
+      quick.classList.remove('open');
+      quick.dataset.idx = '';
+      document.querySelectorAll('.mobile-cat-strip button.active').forEach(b => b.classList.remove('active'));
+    }
   }
 });
 
